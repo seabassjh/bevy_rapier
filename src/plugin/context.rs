@@ -1,3 +1,4 @@
+use bevy::reflect::Reflect;
 use bevy::time::Time;
 use std::collections::HashMap;
 use std::sync::RwLock;
@@ -12,16 +13,63 @@ use rapier::prelude::{
 use crate::geometry::{Collider, PointProjection, RayIntersection, Toi};
 use crate::math::{Rot, Vect};
 use crate::pipeline::{CollisionEvent, ContactForceEvent, EventQueue, QueryFilter};
-use bevy::prelude::{Entity, EventWriter, GlobalTransform, Query};
-use bevy::render::primitives::Aabb;
+use bevy::prelude::{Component, Entity, EventWriter, GlobalTransform, Query};
 
 use crate::control::{CharacterCollision, MoveShapeOptions, MoveShapeOutput};
 use crate::dynamics::TransformInterpolation;
 use crate::plugin::configuration::{SimulationToRenderTime, TimestepMode};
 use crate::prelude::RapierRigidBodyHandle;
+use bevy::ecs::reflect::ReflectComponent;
 #[cfg(feature = "dim2")]
 use bevy::math::Vec3Swizzles;
+use bevy::math::*;
 use rapier::control::CharacterAutostep;
+
+/// An Axis-Aligned Bounding Box
+#[derive(Component, Clone, Debug, Default, Reflect)]
+#[reflect(Component)]
+pub struct Aabb {
+    pub center: Vec3A,
+    pub half_extents: Vec3A,
+}
+
+impl Aabb {
+    #[inline]
+    pub fn from_min_max(minimum: Vec3, maximum: Vec3) -> Self {
+        let minimum = Vec3A::from(minimum);
+        let maximum = Vec3A::from(maximum);
+        let center = 0.5 * (maximum + minimum);
+        let half_extents = 0.5 * (maximum - minimum);
+        Self {
+            center,
+            half_extents,
+        }
+    }
+
+    /// Calculate the relative radius of the AABB with respect to a plane
+    #[inline]
+    pub fn relative_radius(&self, p_normal: &Vec3A, axes: &[Vec3A]) -> f32 {
+        // NOTE: dot products on Vec3A use SIMD and even with the overhead of conversion are net faster than Vec3
+        let half_extents = self.half_extents;
+        Vec3A::new(
+            p_normal.dot(axes[0]),
+            p_normal.dot(axes[1]),
+            p_normal.dot(axes[2]),
+        )
+        .abs()
+        .dot(half_extents)
+    }
+
+    #[inline]
+    pub fn min(&self) -> Vec3A {
+        self.center - self.half_extents
+    }
+
+    #[inline]
+    pub fn max(&self) -> Vec3A {
+        self.center + self.half_extents
+    }
+}
 
 /// The Rapier context, containing all the state of the physics engine.
 #[cfg_attr(feature = "serde-serialize", derive(Serialize, Deserialize))]

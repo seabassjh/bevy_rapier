@@ -22,8 +22,6 @@ pub struct RapierColliderHandle(pub ColliderHandle);
 #[derive(Component, Debug, Clone, Reflect)]
 #[reflect(Component)]
 pub struct AsyncCollider {
-    /// Mesh handle to use for collider generation.
-    pub handle: Handle<Mesh>,
     /// Collider type that will be generated.
     pub shape: ComputedColliderShape,
 }
@@ -32,7 +30,6 @@ pub struct AsyncCollider {
 impl Default for AsyncCollider {
     fn default() -> Self {
         Self {
-            handle: Default::default(),
             shape: ComputedColliderShape::TriMesh,
         }
     }
@@ -90,7 +87,7 @@ impl<'a> From<&'a Collider> for &'a dyn Shape {
 
 impl fmt::Debug for Collider {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.as_typed_shape().fmt(f)
+        fmt::Result::Ok(())
     }
 }
 

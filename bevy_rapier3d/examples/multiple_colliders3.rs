@@ -11,7 +11,6 @@ fn main() {
         .insert_resource(Msaa::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
         .run();
@@ -74,24 +73,21 @@ pub fn setup_physics(mut commands: Commands) {
                     .with_children(|children| {
                         children
                             .spawn()
-                            .insert(Collider::cuboid(rad * 10.0, rad, rad))
-                            .insert(ColliderDebugColor(colors[color % 3]));
+                            .insert(Collider::cuboid(rad * 10.0, rad, rad));
                         children
                             .spawn_bundle(TransformBundle::from(Transform::from_xyz(
                                 rad * 10.0,
                                 rad * 10.0,
                                 0.0,
                             )))
-                            .insert(Collider::cuboid(rad, rad * 10.0, rad))
-                            .insert(ColliderDebugColor(colors[color % 3]));
+                            .insert(Collider::cuboid(rad, rad * 10.0, rad));
                         children
                             .spawn_bundle(TransformBundle::from(Transform::from_xyz(
                                 -rad * 10.0,
                                 rad * 10.0,
                                 0.0,
                             )))
-                            .insert(Collider::cuboid(rad, rad * 10.0, rad))
-                            .insert(ColliderDebugColor(colors[color % 3]));
+                            .insert(Collider::cuboid(rad, rad * 10.0, rad));
                     });
             }
         }

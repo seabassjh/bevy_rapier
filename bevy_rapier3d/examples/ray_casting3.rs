@@ -11,7 +11,6 @@ fn main() {
         .insert_resource(Msaa::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
         .add_system(cast_ray)
@@ -99,7 +98,6 @@ fn cast_ray(
             // Because of the query filter, only colliders attached to a dynamic body
             // will get an event.
             let color = Color::BLUE;
-            commands.entity(entity).insert(ColliderDebugColor(color));
         }
     }
 }

@@ -50,7 +50,6 @@ fn main() {
     .insert_resource(Msaa::default())
     .insert_resource(FrameCount(0))
     .add_plugins(DefaultPlugins)
-    .add_plugin(RapierDebugRenderPlugin::default())
     .add_startup_system(setup_graphics)
     .add_startup_system(setup_physics);
 
@@ -171,8 +170,7 @@ pub fn setup_physics(mut commands: Commands) {
                 commands
                     .spawn_bundle(TransformBundle::from(Transform::from_xyz(x, y, z)))
                     .insert(RigidBody::Dynamic)
-                    .insert(Collider::cuboid(rad, rad, rad))
-                    .insert(ColliderDebugColor(colors[color % 3]));
+                    .insert(Collider::cuboid(rad, rad, rad));
             }
         }
 

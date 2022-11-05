@@ -17,7 +17,6 @@ fn main() {
         .insert_resource(DespawnResource::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
         .add_system(despawn)
@@ -78,8 +77,7 @@ pub fn setup_physics(mut commands: Commands, mut despawn: ResMut<DespawnResource
                 commands
                     .spawn_bundle(TransformBundle::from(Transform::from_xyz(x, y, z)))
                     .insert(RigidBody::Dynamic)
-                    .insert(Collider::cuboid(rad, rad, rad))
-                    .insert(ColliderDebugColor(colors[color % 3]));
+                    .insert(Collider::cuboid(rad, rad, rad));
             }
         }
 

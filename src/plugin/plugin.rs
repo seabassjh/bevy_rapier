@@ -64,11 +64,6 @@ impl<PhysicsHooksData: 'static + WorldQuery + Send + Sync> RapierPhysicsPlugin<P
                         bevy::transform::transform_propagate_system
                             .after(systems::update_character_controls),
                     ) // Run Bevy transform propagation additionally to sync [`GlobalTransform`]
-                    .with_system(
-                        systems::init_async_colliders
-                            .after(bevy::transform::transform_propagate_system),
-                    )
-                    .with_system(systems::apply_scale.after(systems::init_async_colliders))
                     .with_system(systems::apply_collider_user_changes.after(systems::apply_scale))
                     .with_system(
                         systems::apply_rigid_body_user_changes
@@ -81,11 +76,7 @@ impl<PhysicsHooksData: 'static + WorldQuery + Send + Sync> RapierPhysicsPlugin<P
                     .with_system(
                         systems::init_rigid_bodies.after(systems::apply_joint_user_changes),
                     )
-                    .with_system(
-                        systems::init_colliders
-                            .after(systems::init_rigid_bodies)
-                            .after(systems::init_async_colliders),
-                    )
+                    .with_system(systems::init_colliders.after(systems::init_rigid_bodies))
                     .with_system(systems::init_joints.after(systems::init_colliders))
                     .with_system(
                         systems::apply_initial_rigid_body_impulses.after(systems::init_colliders),
@@ -96,16 +87,7 @@ impl<PhysicsHooksData: 'static + WorldQuery + Send + Sync> RapierPhysicsPlugin<P
                             .after(systems::apply_initial_rigid_body_impulses),
                     );
 
-                #[cfg(feature = "dim3")]
-                {
-                    systems.with_system(
-                        systems::init_async_scene_colliders.before(systems::init_async_colliders),
-                    )
-                }
-                #[cfg(not(feature = "dim3"))]
-                {
-                    systems
-                }
+                systems
             }
             PhysicsStages::StepSimulation => SystemSet::new()
                 .with_system(systems::step_simulation::<PhysicsHooksData>)

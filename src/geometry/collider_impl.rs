@@ -1,10 +1,7 @@
+#[cfg(feature = "dim3")]
+use bevy::prelude::*;
 #[cfg(feature = "dim2")]
 use na::DVector;
-#[cfg(feature = "dim3")]
-use {
-    bevy::prelude::*,
-    bevy::render::mesh::{Indices, VertexAttributeValues},
-};
 
 use rapier::prelude::{FeatureId, Point, Ray, SharedShape, Vector, DIM};
 
@@ -165,25 +162,6 @@ impl Collider {
     ) -> Self {
         let vertices = vertices.into_iter().map(|v| v.into()).collect();
         SharedShape::trimesh_with_flags(vertices, indices, flags).into()
-    }
-
-    /// Initializes a collider with a Bevy Mesh.
-    ///
-    /// Returns `None` if the index buffer or vertex buffer of the mesh are in an incompatible format.
-    #[cfg(feature = "dim3")]
-    pub fn from_bevy_mesh(mesh: &Mesh, collider_shape: &ComputedColliderShape) -> Option<Self> {
-        let vertices_indices = extract_mesh_vertices_indices(mesh);
-        match collider_shape {
-            ComputedColliderShape::TriMesh => vertices_indices.map(|(vtx, idx)| {
-                SharedShape::trimesh_with_flags(vtx, idx, TriMeshFlags::MERGE_DUPLICATE_VERTICES)
-                    .into()
-            }),
-            ComputedColliderShape::ConvexDecomposition(params) => {
-                vertices_indices.map(|(vtx, idx)| {
-                    SharedShape::convex_decomposition_with_params(&vtx, &idx, params).into()
-                })
-            }
-        }
     }
 
     /// Initializes a collider with a compound shape obtained from the decomposition of
@@ -734,37 +712,4 @@ impl Default for Collider {
     fn default() -> Self {
         Self::ball(0.5)
     }
-}
-
-#[cfg(feature = "dim3")]
-#[allow(clippy::type_complexity)]
-fn extract_mesh_vertices_indices(mesh: &Mesh) -> Option<(Vec<na::Point3<Real>>, Vec<[u32; 3]>)> {
-    use rapier::na::point;
-
-    let vertices = mesh.attribute(Mesh::ATTRIBUTE_POSITION)?;
-    let indices = mesh.indices()?;
-
-    let vtx: Vec<_> = match vertices {
-        VertexAttributeValues::Float32(vtx) => Some(
-            vtx.chunks(3)
-                .map(|v| point![v[0] as Real, v[1] as Real, v[2] as Real])
-                .collect(),
-        ),
-        VertexAttributeValues::Float32x3(vtx) => Some(
-            vtx.iter()
-                .map(|v| point![v[0] as Real, v[1] as Real, v[2] as Real])
-                .collect(),
-        ),
-        _ => None,
-    }?;
-
-    let idx = match indices {
-        Indices::U16(idx) => idx
-            .chunks_exact(3)
-            .map(|i| [i[0] as u32, i[1] as u32, i[2] as u32])
-            .collect(),
-        Indices::U32(idx) => idx.chunks_exact(3).map(|i| [i[0], i[1], i[2]]).collect(),
-    };
-
-    Some((vtx, idx))
 }

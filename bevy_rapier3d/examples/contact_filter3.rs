@@ -38,7 +38,6 @@ fn main() {
         .insert_resource(Msaa::default())
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<&CustomFilterTag>::default())
-        .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup_graphics)
         .add_startup_system(setup_physics)
         .run();
@@ -96,8 +95,7 @@ pub fn setup_physics(mut commands: Commands) {
                 .insert(RigidBody::Dynamic)
                 .insert(Collider::cuboid(rad, rad, rad))
                 .insert(ActiveHooks::FILTER_CONTACT_PAIRS)
-                .insert(tags[group_id % 2])
-                .insert(ColliderDebugColor(colors[group_id % 2]));
+                .insert(tags[group_id % 2]);
         }
     }
 }

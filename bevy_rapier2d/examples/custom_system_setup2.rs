@@ -50,7 +50,6 @@ fn main() {
     .insert_resource(Msaa::default())
     .insert_resource(FrameCount(0))
     .add_plugins(DefaultPlugins)
-    .add_plugin(RapierDebugRenderPlugin::default())
     .add_startup_system(setup_graphics)
     .add_startup_system(setup_physics);
 
